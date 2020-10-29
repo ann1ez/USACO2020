@@ -1,0 +1,103 @@
+import java.io.*;
+import java.util.*;
+
+public class triangles {
+
+	public static void main(String[] args) throws IOException {
+		Scanner in = new Scanner(new FileReader("triangles.in"));
+		HashMap<Integer, List<Integer>> xcoor = new HashMap<Integer, List<Integer>>();
+		HashMap<Integer, List<Integer>> ycoor = new HashMap<Integer, List<Integer>>();
+		int N = in.nextInt();
+		for(int i=0; i<N; i++)
+		{
+			int x = in.nextInt();
+			int y = in.nextInt();
+			
+			if(xcoor.containsKey(x))							//adding to the stem and leaf plot
+				xcoor.get(x).add(y);							  //where x-coor is the stem
+			else
+			{
+				List<Integer> list = new ArrayList<Integer>();
+				list.add(y);
+				xcoor.put(x, list);
+			}
+			
+			if(ycoor.containsKey(y))							//adding to the stem and leaf plot
+				ycoor.get(y).add(x);							  //where y-coor is the stem
+			else
+			{
+				List<Integer> list = new ArrayList<Integer>();
+				list.add(x);
+				ycoor.put(y, list);
+			}
+		}
+		in.close();
+
+		
+		long total = 0;
+		HashMap<String, Long> xsum = new HashMap<String, Long>();
+		HashMap<String, Long> ysum = new HashMap<String, Long>();
+		xsum = fill(xcoor, true);
+		ysum = fill(ycoor, false);
+	
+		for(Map.Entry<String, Long> line : xsum.entrySet())
+		{
+			if(ysum.containsKey(line.getKey()))
+				total += line.getValue() * ysum.get(line.getKey()) ;
+		}
+
+
+		PrintWriter out = new PrintWriter(new File("triangles.out"));
+		out.println(total % 1000000007);
+		out.close();
+	}
+	
+	public static long sum(int a, List<Integer> list)
+	{
+		long sum = 0;
+		for(int b : list)
+		{
+			sum += Math.abs(a-b);
+			sum %= 1000000007;
+		}
+			
+		return sum;
+	}
+	
+	public static HashMap<String, Long> fill(HashMap<Integer, List<Integer>> coor, boolean t)
+	{
+		HashMap<String, Long> xsum = new HashMap<String, Long>();
+
+		for(HashMap.Entry<Integer, List<Integer>> line : coor.entrySet())
+		{
+			if(line.getValue().size() > 1)
+			{
+				Collections.sort(line.getValue(), Collections.reverseOrder());
+				
+				int x = line.getKey();
+				int y = line.getValue().get(0);
+				long[] tempsum = new long[line.getValue().size()];
+				
+				tempsum[0] = sum(y, line.getValue());				//base case
+				if(t)
+					xsum.put(x + "." + y, tempsum[0]);
+				else
+					xsum.put(y + "." + x, tempsum[0]);
+				
+				for(int i=1; i<line.getValue().size(); i++)			//induction
+				{
+					y = line.getValue().get(i);
+					long diff = (line.getValue().get(i-1) - y) % 1000000007;
+					long change = ((line.getValue().size()-2*i) * diff) % 1000000007;
+					tempsum[i] = tempsum[i-1] - (int) change;
+					
+					if(t)
+						xsum.put(x + "." + y, tempsum[i]);
+					else
+						xsum.put(y + "." + x, tempsum[i]);
+				}
+			}
+		}
+		return xsum;
+	}
+}
