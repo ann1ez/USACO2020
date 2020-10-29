@@ -1,0 +1,77 @@
+import java.io.*;
+import java.util.*;
+
+public class swap {
+
+	public static void main(String[] args) throws IOException {
+		
+		Scanner in = new Scanner(new FileReader("swap.in"));
+		int N = in.nextInt();
+		int M = in.nextInt();
+		int K = in.nextInt();
+		int[] arr = new int[N+1];
+		for(int i=1; i<=N; i++)
+			arr[i] = i;
+		
+		for(int i=0; i<M; i++)
+		{
+			int x = in.nextInt();
+			int y = in.nextInt();
+			arr = reverse(arr, x, y);		//arr will serve as the record of 
+		}                             //the pathway after a single round
+		in.close();
+
+		boolean[] visited = new boolean[N+1];
+		int marker = 1;								//marker is the start of new loop
+		int[] result = new int[N+1];
+		
+		while(marker < N+1)
+		{
+			if(!visited[marker])
+			{
+				int i = marker;
+				int x = -1;
+				ArrayList<Integer> loop = new ArrayList<Integer>();
+				
+				while(x != marker)				//creating the loop
+				{
+					x = arr[i];
+					loop.add(x);
+					i = x;
+					visited[x] = true;
+				}
+				
+				int shiftvalue = K % (loop.size());	//using the loop to construct result
+				for(int j=0; j<loop.size(); j++)
+				{
+					int index = j-shiftvalue;
+					if (index < 0)
+						index += loop.size();
+
+					result[loop.get(index)] = loop.get(j);
+				}
+			}
+			marker++;
+		}
+		
+		PrintWriter out = new PrintWriter(new File("swap.out"));
+		for(int i=1; i<=N; i++)						
+			out.println(result[i]);
+		out.close();
+	}
+
+	public static int[] reverse(int[] a, int start, int end)
+	{
+		int[] b = new int [a.length];
+		for(int i = 0; i<a.length; i++)
+			b[i] = a[i];
+
+		int index = end;
+		for(int i=start; i<=end; i++)
+		{
+			b[i] = a[index];
+			index--;
+		}
+		return b;
+	}
+}
